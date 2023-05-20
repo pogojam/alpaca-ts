@@ -7,7 +7,7 @@ import qs from 'qs';
 import isofetch from 'isomorphic-unfetch';
 import Bottleneck from 'bottleneck';
 import isBlob from 'is-blob';
-import WebSocket from 'isomorphic-ws/index.js';
+import WebSocket from 'isomorphic-ws';
 import EventEmitter from 'eventemitter3';
 
 /*! *****************************************************************************

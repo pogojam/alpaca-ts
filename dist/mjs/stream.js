@@ -1,6 +1,6 @@
 import isBlob from 'is-blob';
 import parse from './parse.js';
-import WebSocket from 'isomorphic-ws/index.js';
+import WebSocket from 'isomorphic-ws';
 import endpoints from './endpoints.js';
 import EventEmitter from 'eventemitter3';
 export class AlpacaStream extends EventEmitter {
