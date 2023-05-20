@@ -4,6 +4,7 @@
  */
 
 import require$$0$3 from 'util';
+import WebSocket from 'isomorphic-ws/index.js';
 
 /* eslint complexity: [2, 18], max-statements: [2, 33] */
 var shams = function hasSymbols() {
@@ -441,8 +442,6 @@ var getIntrinsic = function GetIntrinsic(name, allowMissing) {
 	}
 	return value;
 };
-
-var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function getAugmentedNamespace(n) {
 	if (n.__esModule) return n;
@@ -2366,7 +2365,7 @@ var unfetch_module$1 = /*#__PURE__*/Object.freeze({
 
 var require$$0$2 = /*@__PURE__*/getAugmentedNamespace(unfetch_module$1);
 
-var browser$1 = self.fetch || (self.fetch = require$$0$2.default || require$$0$2);
+var browser = self.fetch || (self.fetch = require$$0$2.default || require$$0$2);
 
 const endpoints = {
     rest: {
@@ -5156,7 +5155,7 @@ var Bottleneck_1 = Bottleneck;
 
 var lib = require$$0;
 
-const unifetch = typeof fetch !== 'undefined' ? fetch : browser$1;
+const unifetch = typeof fetch !== 'undefined' ? fetch : browser;
 class AlpacaClient {
     params;
     baseURLs = endpoints;
@@ -5499,24 +5498,6 @@ var isBlob = value => {
 
 	return value instanceof Blob || Object.prototype.toString.call(value) === '[object Blob]';
 };
-
-// https://github.com/maxogden/websocket-stream/blob/48dc3ddf943e5ada668c31ccd94e9186f02fafbd/ws-fallback.js
-
-var ws = null;
-
-if (typeof WebSocket !== 'undefined') {
-  ws = WebSocket;
-} else if (typeof MozWebSocket !== 'undefined') {
-  ws = MozWebSocket;
-} else if (typeof commonjsGlobal !== 'undefined') {
-  ws = commonjsGlobal.WebSocket || commonjsGlobal.MozWebSocket;
-} else if (typeof window !== 'undefined') {
-  ws = window.WebSocket || window.MozWebSocket;
-} else if (typeof self !== 'undefined') {
-  ws = self.WebSocket || self.MozWebSocket;
-}
-
-var browser = ws;
 
 var eventemitter3 = createCommonjsModule(function (module) {
 
@@ -5884,7 +5865,7 @@ class AlpacaStream extends eventemitter3 {
             default:
                 this.host = 'unknown';
         }
-        this.connection = new browser(this.host);
+        this.connection = new WebSocket(this.host);
         this.connection.onopen = () => {
             let message = {};
             switch (this.params.type) {

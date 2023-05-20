@@ -4,14 +4,15 @@
  */
 
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('util')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'util'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.alpaca = {}, global.require$$0$3));
-}(this, (function (exports, require$$0$3) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('util'), require('isomorphic-ws/index.js')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'util', 'isomorphic-ws/index.js'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.alpaca = {}, global.require$$0$3, global.WebSocket));
+}(this, (function (exports, require$$0$3, WebSocket) { 'use strict';
 
 	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 	var require$$0__default = /*#__PURE__*/_interopDefaultLegacy(require$$0$3);
+	var WebSocket__default = /*#__PURE__*/_interopDefaultLegacy(WebSocket);
 
 	/* eslint complexity: [2, 18], max-statements: [2, 33] */
 	var shams = function hasSymbols() {
@@ -449,8 +450,6 @@
 		}
 		return value;
 	};
-
-	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 	function getAugmentedNamespace(n) {
 		if (n.__esModule) return n;
@@ -2374,7 +2373,7 @@
 
 	var require$$0$2 = /*@__PURE__*/getAugmentedNamespace(unfetch_module$1);
 
-	var browser$1 = self.fetch || (self.fetch = require$$0$2.default || require$$0$2);
+	var browser = self.fetch || (self.fetch = require$$0$2.default || require$$0$2);
 
 	const endpoints = {
 	    rest: {
@@ -5164,7 +5163,7 @@
 
 	var lib = require$$0;
 
-	const unifetch = typeof fetch !== 'undefined' ? fetch : browser$1;
+	const unifetch = typeof fetch !== 'undefined' ? fetch : browser;
 	class AlpacaClient {
 	    params;
 	    baseURLs = endpoints;
@@ -5507,24 +5506,6 @@
 
 		return value instanceof Blob || Object.prototype.toString.call(value) === '[object Blob]';
 	};
-
-	// https://github.com/maxogden/websocket-stream/blob/48dc3ddf943e5ada668c31ccd94e9186f02fafbd/ws-fallback.js
-
-	var ws = null;
-
-	if (typeof WebSocket !== 'undefined') {
-	  ws = WebSocket;
-	} else if (typeof MozWebSocket !== 'undefined') {
-	  ws = MozWebSocket;
-	} else if (typeof commonjsGlobal !== 'undefined') {
-	  ws = commonjsGlobal.WebSocket || commonjsGlobal.MozWebSocket;
-	} else if (typeof window !== 'undefined') {
-	  ws = window.WebSocket || window.MozWebSocket;
-	} else if (typeof self !== 'undefined') {
-	  ws = self.WebSocket || self.MozWebSocket;
-	}
-
-	var browser = ws;
 
 	var eventemitter3 = createCommonjsModule(function (module) {
 
@@ -5892,7 +5873,7 @@
 	            default:
 	                this.host = 'unknown';
 	        }
-	        this.connection = new browser(this.host);
+	        this.connection = new WebSocket__default['default'](this.host);
 	        this.connection.onopen = () => {
 	            let message = {};
 	            switch (this.params.type) {

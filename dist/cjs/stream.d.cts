@@ -1,5 +1,5 @@
 /// <reference types="ws" />
-import WebSocket from 'isomorphic-ws';
+import WebSocket from 'isomorphic-ws/index.cjs';
 import EventEmitter from 'eventemitter3';
 import { Bar, Channel, DataSource, DefaultCredentials, Quote, Trade, TradeUpdate, Message, Endpoints } from './entities.cjs';
 export declare interface Events {
