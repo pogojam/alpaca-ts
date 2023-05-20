@@ -94,8 +94,10 @@ function canceled_order(input) {
     }
     let order = input.body;
     delete input.body;
+    if (!order)
+        return;
     try {
-        return Object.assign(Object.assign({}, input), { order: Object.assign(Object.assign({}, order), { raw: () => order, created_at: new Date(order.created_at), updated_at: new Date(order.updated_at), submitted_at: new Date(order.submitted_at), filled_at: new Date(order.filled_at), expired_at: new Date(order.expired_at), canceled_at: new Date(order.canceled_at), failed_at: new Date(order.failed_at), replaced_at: new Date(order.replaced_at), qty: number(order.qty), filled_qty: number(order.filled_qty), type: order.type, side: order.side, time_in_force: order.time_in_force, limit_price: number(order.limit_price), stop_price: number(order.stop_price), filled_avg_price: number(order.filled_avg_price), status: order.status, legs: orders(order.legs), trail_price: number(order.trail_price), trail_percent: number(order.trail_percent), hwm: number(order.hwm), order_class: order.order_class }) });
+        return Object.assign(Object.assign({}, input), { order: Object.assign(Object.assign({}, order), { raw: () => order, created_at: new Date(order === null || order === void 0 ? void 0 : order.created_at), updated_at: new Date(order.updated_at), submitted_at: new Date(order.submitted_at), filled_at: new Date(order.filled_at), expired_at: new Date(order.expired_at), canceled_at: new Date(order.canceled_at), failed_at: new Date(order.failed_at), replaced_at: new Date(order.replaced_at), qty: number(order.qty), filled_qty: number(order.filled_qty), type: order.type, side: order.side, time_in_force: order.time_in_force, limit_price: number(order.limit_price), stop_price: number(order.stop_price), filled_avg_price: number(order.filled_avg_price), status: order.status, legs: orders(order.legs), trail_price: number(order.trail_price), trail_percent: number(order.trail_percent), hwm: number(order.hwm), order_class: order.order_class }) });
     }
     catch (err) {
         throw new Error(`Order parsing failed. ${err.message}`);

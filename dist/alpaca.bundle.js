@@ -1351,6 +1351,7 @@ var encode$1 = function encode(str, defaultEncoder, charset, kind, format) {
 
         i += 1;
         c = 0x10000 + (((c & 0x3FF) << 10) | (string.charCodeAt(i) & 0x3FF));
+        /* eslint operator-linebreak: [2, "before"] */
         out += hexTable[0xF0 | (c >> 18)]
             + hexTable[0x80 | ((c >> 12) & 0x3F)]
             + hexTable[0x80 | ((c >> 6) & 0x3F)]
@@ -1440,6 +1441,7 @@ var arrayPrefixGenerators = {
 };
 
 var isArray$1 = Array.isArray;
+var split = String.prototype.split;
 var push$1 = Array.prototype.push;
 var pushToArray = function (arr, valueOrArray) {
     push$1.apply(arr, isArray$1(valueOrArray) ? valueOrArray : [valueOrArray]);
@@ -1476,6 +1478,8 @@ var isNonNullishPrimitive = function isNonNullishPrimitive(v) {
         || typeof v === 'bigint';
 };
 
+var sentinel = {};
+
 var stringify = function stringify(
     object,
     prefix,
@@ -1495,8 +1499,23 @@ var stringify = function stringify(
 ) {
     var obj = object;
 
-    if (sideChannel$1.has(object)) {
-        throw new RangeError('Cyclic object value');
+    var tmpSc = sideChannel$1;
+    var step = 0;
+    var findFlag = false;
+    while ((tmpSc = tmpSc.get(sentinel)) !== void undefined && !findFlag) {
+        // Where object last appeared in the ref tree
+        var pos = tmpSc.get(object);
+        step += 1;
+        if (typeof pos !== 'undefined') {
+            if (pos === step) {
+                throw new RangeError('Cyclic object value');
+            } else {
+                findFlag = true; // Break while
+            }
+        }
+        if (typeof tmpSc.get(sentinel) === 'undefined') {
+            step = 0;
+        }
     }
 
     if (typeof filter === 'function') {
@@ -1523,6 +1542,14 @@ var stringify = function stringify(
     if (isNonNullishPrimitive(obj) || utils$1.isBuffer(obj)) {
         if (encoder) {
             var keyValue = encodeValuesOnly ? prefix : encoder(prefix, defaults$1.encoder, charset, 'key', format);
+            if (generateArrayPrefix === 'comma' && encodeValuesOnly) {
+                var valuesArray = split.call(String(obj), ',');
+                var valuesJoined = '';
+                for (var i = 0; i < valuesArray.length; ++i) {
+                    valuesJoined += (i === 0 ? '' : ',') + formatter(encoder(valuesArray[i], defaults$1.encoder, charset, 'value', format));
+                }
+                return [formatter(keyValue) + '=' + valuesJoined];
+            }
             return [formatter(keyValue) + '=' + formatter(encoder(obj, defaults$1.encoder, charset, 'value', format))];
         }
         return [formatter(prefix) + '=' + formatter(String(obj))];
@@ -1537,7 +1564,7 @@ var stringify = function stringify(
     var objKeys;
     if (generateArrayPrefix === 'comma' && isArray$1(obj)) {
         // we need to join elements in
-        objKeys = [{ value: obj.length > 0 ? obj.join(',') || null : undefined }];
+        objKeys = [{ value: obj.length > 0 ? obj.join(',') || null : void undefined }];
     } else if (isArray$1(filter)) {
         objKeys = filter;
     } else {
@@ -1545,9 +1572,9 @@ var stringify = function stringify(
         objKeys = sort ? keys.sort(sort) : keys;
     }
 
-    for (var i = 0; i < objKeys.length; ++i) {
-        var key = objKeys[i];
-        var value = typeof key === 'object' && key.value !== undefined ? key.value : obj[key];
+    for (var j = 0; j < objKeys.length; ++j) {
+        var key = objKeys[j];
+        var value = typeof key === 'object' && typeof key.value !== 'undefined' ? key.value : obj[key];
 
         if (skipNulls && value === null) {
             continue;
@@ -1557,8 +1584,9 @@ var stringify = function stringify(
             ? typeof generateArrayPrefix === 'function' ? generateArrayPrefix(prefix, key) : prefix
             : prefix + (allowDots ? '.' + key : '[' + key + ']');
 
-        sideChannel$1.set(object, true);
+        sideChannel$1.set(object, step);
         var valueSideChannel = sideChannel();
+        valueSideChannel.set(sentinel, sideChannel$1);
         pushToArray(values, stringify(
             value,
             keyPrefix,
@@ -1586,7 +1614,7 @@ var normalizeStringifyOptions = function normalizeStringifyOptions(opts) {
         return defaults$1;
     }
 
-    if (opts.encoder !== null && opts.encoder !== undefined && typeof opts.encoder !== 'function') {
+    if (opts.encoder !== null && typeof opts.encoder !== 'undefined' && typeof opts.encoder !== 'function') {
         throw new TypeError('Encoder has to be a function.');
     }
 
@@ -1844,7 +1872,7 @@ var parseObject = function (chain, val, options, valuesParsed) {
             ) {
                 obj = [];
                 obj[index] = leaf;
-            } else {
+            } else if (cleanRoot !== '__proto__') {
                 obj[cleanRoot] = leaf;
             }
         }
@@ -2035,8 +2063,10 @@ function canceled_order(input) {
     }
     let order = input.body;
     delete input.body;
+    if (!order)
+        return;
     try {
-        return Object.assign(Object.assign({}, input), { order: Object.assign(Object.assign({}, order), { raw: () => order, created_at: new Date(order.created_at), updated_at: new Date(order.updated_at), submitted_at: new Date(order.submitted_at), filled_at: new Date(order.filled_at), expired_at: new Date(order.expired_at), canceled_at: new Date(order.canceled_at), failed_at: new Date(order.failed_at), replaced_at: new Date(order.replaced_at), qty: number(order.qty), filled_qty: number(order.filled_qty), type: order.type, side: order.side, time_in_force: order.time_in_force, limit_price: number(order.limit_price), stop_price: number(order.stop_price), filled_avg_price: number(order.filled_avg_price), status: order.status, legs: orders(order.legs), trail_price: number(order.trail_price), trail_percent: number(order.trail_percent), hwm: number(order.hwm), order_class: order.order_class }) });
+        return Object.assign(Object.assign({}, input), { order: Object.assign(Object.assign({}, order), { raw: () => order, created_at: new Date(order === null || order === void 0 ? void 0 : order.created_at), updated_at: new Date(order.updated_at), submitted_at: new Date(order.submitted_at), filled_at: new Date(order.filled_at), expired_at: new Date(order.expired_at), canceled_at: new Date(order.canceled_at), failed_at: new Date(order.failed_at), replaced_at: new Date(order.replaced_at), qty: number(order.qty), filled_qty: number(order.filled_qty), type: order.type, side: order.side, time_in_force: order.time_in_force, limit_price: number(order.limit_price), stop_price: number(order.stop_price), filled_avg_price: number(order.filled_avg_price), status: order.status, legs: orders(order.legs), trail_price: number(order.trail_price), trail_percent: number(order.trail_percent), hwm: number(order.hwm), order_class: order.order_class }) });
     }
     catch (err) {
         throw new Error(`Order parsing failed. ${err.message}`);

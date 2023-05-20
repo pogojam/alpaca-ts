@@ -109,13 +109,15 @@ function canceled_order(input) {
     let order = input.body;
     // we don't want this field anymore
     delete input.body;
+    if (!order)
+        return;
     try {
         return {
             ...input,
             order: {
                 ...order,
                 raw: () => order,
-                created_at: new Date(order.created_at),
+                created_at: new Date(order?.created_at),
                 updated_at: new Date(order.updated_at),
                 submitted_at: new Date(order.submitted_at),
                 filled_at: new Date(order.filled_at),
