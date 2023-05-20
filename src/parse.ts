@@ -155,14 +155,14 @@ function canceled_order(input: RawOrderCancelation): OrderCancelation {
 
   // we don't want this field anymore
   delete input.body;
-
+  if (!order) return
   try {
     return {
       ...input,
       order: {
         ...order,
         raw: () => order,
-        created_at: new Date(order.created_at),
+        created_at: new Date(order?.created_at),
         updated_at: new Date(order.updated_at),
         submitted_at: new Date(order.submitted_at),
         filled_at: new Date(order.filled_at),
@@ -361,33 +361,33 @@ function snapshot(raw: RawSnapshot): Snapshot {
       raw: () => raw,
       latestTrade: raw.latestTrade
         ? {
-            ...raw.latestTrade,
-            t: new Date(raw.latestTrade.t),
-          }
+          ...raw.latestTrade,
+          t: new Date(raw.latestTrade.t),
+        }
         : null,
       latestQuote: raw.latestQuote
         ? {
-            ...raw.latestQuote,
-            t: new Date(raw.latestQuote.t),
-          }
+          ...raw.latestQuote,
+          t: new Date(raw.latestQuote.t),
+        }
         : null,
       minuteBar: raw.minuteBar
         ? {
-            ...raw.minuteBar,
-            t: new Date(raw.minuteBar.t),
-          }
+          ...raw.minuteBar,
+          t: new Date(raw.minuteBar.t),
+        }
         : null,
       dailyBar: raw.dailyBar
         ? {
-            ...raw.dailyBar,
-            t: new Date(raw.dailyBar.t),
-          }
+          ...raw.dailyBar,
+          t: new Date(raw.dailyBar.t),
+        }
         : null,
       prevDailyBar: raw.prevDailyBar
         ? {
-            ...raw.prevDailyBar,
-            t: new Date(raw.prevDailyBar.t),
-          }
+          ...raw.prevDailyBar,
+          t: new Date(raw.prevDailyBar.t),
+        }
         : null,
     } as any as Snapshot;
   } catch (err) {
